@@ -1,0 +1,6 @@
+shading wireframe
+push
+rotate x 40
+rotate y 30
+box 250 250 0 50 100 30
+display

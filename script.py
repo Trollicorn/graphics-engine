@@ -67,6 +67,7 @@ def run(filename):
     basename = 'anim/frame'
     bname = 'frame'
     knobs = []
+    shading = 'flat'
 #    print(symbols)
 #    print csystems
     for command in commands:
@@ -76,6 +77,8 @@ def run(filename):
         elif op == 'basename':
             bname = command['args'][0]
             basename = 'anim/'+bname
+        elif op == shading:
+            shading = command['shade_type']
 ###########---------------------CHECK VARY COUNT, IMPLEMENT OPITIMIZATION LATER
     if frames != 1:
         knobs = [{} for i in range(int(frames))]
@@ -134,6 +137,9 @@ def run(filename):
                 display(screen)
             elif op == 'save' and frames == 1:
                 save_extension(screen,command['args'][0]+'.png')
+            else:
+                print(command['op'])
+                print(command)
         #    print("done")
         if frames != 1:
             basenum = str(f)
