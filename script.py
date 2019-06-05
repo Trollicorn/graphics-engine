@@ -77,7 +77,7 @@ def run(filename):
         elif op == 'basename':
             bname = command['args'][0]
             basename = 'anim/'+bname
-        elif op == shading:
+        elif op == 'shading':
             shading = command['shade_type']
 ###########---------------------CHECK VARY COUNT, IMPLEMENT OPITIMIZATION LATER
     if frames != 1:
@@ -122,11 +122,11 @@ def run(filename):
                 solid[op](tmp,command['args'])
                 matrix_mult(csystems[-1],tmp)
                 if command['constants'] is None:
-                    draw_polygons(tmp,screen,zbuffer,color,view, ambient, light, areflect, dreflect, sreflect)
+                    draw_polygons(tmp,screen,zbuffer,color,view, ambient, light, areflect, dreflect, sreflect, shading)
                 else:
                     const = symbols[command['constants']][1]
                     reflects = [[const['red'][i],const['green'][i],const['blue'][i]] for i in range(3)]
-                    draw_polygons(tmp,screen,zbuffer,color,view, ambient, light, reflects[0], reflects[1], reflects[2])
+                    draw_polygons(tmp,screen,zbuffer,color,view, ambient, light, reflects[0], reflects[1], reflects[2],shading)
                 tmp = []
             elif op in shape:
                 shape[op](tmp,command['args'])

@@ -4,7 +4,7 @@
 
 ### Features to implement (in order)
 - shading wireframe
+- shading gouraud 
 - mesh
 - texture mapping
-- shading Gourod or however it's spelled
 - shading phong
