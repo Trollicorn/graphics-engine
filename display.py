@@ -9,7 +9,7 @@ MAX_COLOR = 255
 RED = 0
 GREEN = 1
 BLUE = 2
-windows = True
+windows = False
 
 DEFAULT_COLOR = [0,0,0]
 

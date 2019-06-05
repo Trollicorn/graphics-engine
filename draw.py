@@ -26,6 +26,7 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
             n = surf(polygons,i)
             if n[2] > 0:
                 color = get_lighting(n, view, ambient, light, areflect, dreflect, sreflect)
+                print(color)
                 scanline(polygons[i],polygons[i+1],polygons[i+2],screen,zbuffer,color)
     elif shading == 'wireframe':
         for i in range(0,len(polygons)-1,3):
@@ -39,19 +40,19 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
         norms = {}
         for i in range(0,len(polygons)-1,3):
             n = surf(polygons,i)
-            p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
-            corn = [tuple(x) for x in p]
-            for i in range(3):
-                normify(norms,corn[i],n)
-        hop = dict(norms)
+            if n[2] > 0:
+                p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
+                corn = [tuple(x) for x in p]
+                for i in range(3):
+                    normify(norms,corn[i],n)
         for j in norms:
-            norm(hop[j])
-            if j[2] > 1:
-                del hop[j]
-        print(hop)
+            norm(norms[j])
+        print(norms)
         for i in range(0,len(polygons)-1,3):
             try:
-                scangouraud(polygons[i],polygons[i+1],polygons[i+2],hop,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
+                n = surf(polygons,i)
+                if n[2] > 0:
+                    scangouraud(polygons[i],polygons[i+1],polygons[i+2],norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
             except KeyError:
                 print("oops")
 
@@ -116,12 +117,13 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     Bnorm = norms[(Bx,bot[1],Bz)]
     Mnorm = norms[(Mx,mid[1],Mz)]
     Tnorm = norms[(Tx,top[1],Tz)]
+#    print("norms",Bnorm,Mnorm,Tnorm)
     Bcolor = get_lighting(Bnorm, view, ambient, light, areflect, dreflect, sreflect)
     Mcolor = get_lighting(Mnorm, view, ambient, light, areflect, dreflect, sreflect)
     Tcolor = get_lighting(Tnorm, view, ambient, light, areflect, dreflect, sreflect)
-    c = [x for x in Bcolor]
+    c0 = [x for x in Bcolor]
     c1 = [x for x in Bcolor]
-    print(Bcolor,Mcolor,Tcolor)
+    #print("colors",Bcolor,Mcolor,Tcolor)
     BtoT = Ty - By * 1.0 + 1
     BtoM = My - By * 1.0 + 1
     MtoT = Ty - My * 1.0 + 1
@@ -131,18 +133,20 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     switch = False
     dx0 = (Tx-Bx)/BtoT if BtoT != 0 else 0
     dz0 = (Tz-Bz)/BtoT if BtoT != 0 else 0
-    dc0 = [(Tcolor[i]-Bcolor[i])/BtoT if BtoT!=0 else 0 for i in range(3)]
+    dc0 = [BctoTc[i]/BtoT if BtoT!=0 else 0 for i in range(3)]
     dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
-    dc1 = [(Mcolor[i]-Bcolor[i])/BtoM if BtoM!=0 else 0 for i in range(3)]
+    dc1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
     for y in range (By,Ty+1):
+        if c1[0] > 200:
+            print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
             dx1 = (Tx-Mx)/MtoT if MtoT != 0 else 0
             dz1 = (Tz-Mz)/MtoT if MtoT != 0 else 0
-            dc1 = [(Tcolor[i]-Mcolor[i])/MtoT if MtoT!=0 else 0 for i in range(3)]
+            dc1 = [MctoTc[i]/MtoT if MtoT!=0 else 0 for i in range(3)]
             x1 = Mx
             z1 = Mz
-            c1 = [x for x in Mcolor]
+            c = [x for x in Mcolor]
             switch = True
         draw_gline(int(x0),z0,int(x1),z1,y,screen,zbuffer,c0,c1)
         x0 += dx0
@@ -236,10 +240,14 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
         x1 = xt
         z1 = zt
         c1 = ct
+
     distance = x1 - x0 + 1
     z = z0
     dz = (z1 - z0) / distance if distance != 0 else 0
+    limit_color(c0)
+    limit_color(c1)
     c = [x for x in c0]
+    print(c0,c1)
     dc = [(c1[i]-c0[i])/distance if distance !=0 else 0 for i in range(3)]
     for x in range(x0,x1+1):
         plot(screen,zbuffer,limit_color([int(c[i]) for i in range(3)]),x,y,z)
