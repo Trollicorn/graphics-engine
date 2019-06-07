@@ -138,8 +138,7 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
     dc1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
     for y in range (By,Ty+1):
-        if c1[0] > 200:
-            print(Bnorm,Mnorm,Tnorm)
+        print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
             dx1 = (Tx-Mx)/MtoT if MtoT != 0 else 0
             dz1 = (Tz-Mz)/MtoT if MtoT != 0 else 0
