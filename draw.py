@@ -26,7 +26,7 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
             n = surf(polygons,i)
             if n[2] > 0:
                 color = get_lighting(n, view, ambient, light, areflect, dreflect, sreflect)
-                print(color)
+            #    print(color)
                 scanline(polygons[i],polygons[i+1],polygons[i+2],screen,zbuffer,color)
     elif shading == 'wireframe':
         for i in range(0,len(polygons)-1,3):
@@ -40,21 +40,20 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
         norms = {}
         for i in range(0,len(polygons)-1,3):
             n = surf(polygons,i)
-            if n[2] > 0:
-                p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
-                corn = [tuple(x) for x in p]
-                for i in range(3):
-                    normify(norms,corn[i],n)
+            p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
+            corn = [tuple(x) for x in p]
+            for i in range(3):
+                normify(norms,corn[i],n)
         for j in norms:
             norm(norms[j])
-        print(norms)
         for i in range(0,len(polygons)-1,3):
-            try:
-                n = surf(polygons,i)
-                if n[2] > 0:
-                    scangouraud(polygons[i],polygons[i+1],polygons[i+2],norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
-            except KeyError:
-                print("oops")
+        #    try:
+            n = surf(polygons,i)
+            if n[2] > 0:
+                scangouraud(polygons[i],polygons[i+1],polygons[i+2],norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
+        #    except KeyError:
+        #        print("oops")
+        #print(norms)
 
 def normify(norms,c,norm):
     if c in norms:
@@ -117,13 +116,11 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     Bnorm = norms[(Bx,bot[1],Bz)]
     Mnorm = norms[(Mx,mid[1],Mz)]
     Tnorm = norms[(Tx,top[1],Tz)]
-#    print("norms",Bnorm,Mnorm,Tnorm)
     Bcolor = get_lighting(Bnorm, view, ambient, light, areflect, dreflect, sreflect)
     Mcolor = get_lighting(Mnorm, view, ambient, light, areflect, dreflect, sreflect)
     Tcolor = get_lighting(Tnorm, view, ambient, light, areflect, dreflect, sreflect)
-    c0 = [x for x in Bcolor]
-    c1 = [x for x in Bcolor]
-    #print("colors",Bcolor,Mcolor,Tcolor)
+    clr0 = [x for x in Bcolor]
+    clr1 = [x for x in Bcolor]
     BtoT = Ty - By * 1.0 + 1
     BtoM = My - By * 1.0 + 1
     MtoT = Ty - My * 1.0 + 1
@@ -133,28 +130,32 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     switch = False
     dx0 = (Tx-Bx)/BtoT if BtoT != 0 else 0
     dz0 = (Tz-Bz)/BtoT if BtoT != 0 else 0
-    dc0 = [BctoTc[i]/BtoT if BtoT!=0 else 0 for i in range(3)]
+    dclr0 = [BctoTc[i]/BtoT if BtoT!=0 else 0 for i in range(3)]
     dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
-    dc1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
+    dclr1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
+    if Ty > 280:
+        print(bot,mid,top)
+        print(Tnorm)
+        print(Bcolor,Mcolor,Tcolor)
     for y in range (By,Ty+1):
-        print(Bnorm,Mnorm,Tnorm)
+    #    print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
             dx1 = (Tx-Mx)/MtoT if MtoT != 0 else 0
             dz1 = (Tz-Mz)/MtoT if MtoT != 0 else 0
-            dc1 = [MctoTc[i]/MtoT if MtoT!=0 else 0 for i in range(3)]
+            dclr1 = [MctoTc[i]/MtoT if MtoT!=0 else 0 for i in range(3)]
             x1 = Mx
             z1 = Mz
             c = [x for x in Mcolor]
             switch = True
-        draw_gline(int(x0),z0,int(x1),z1,y,screen,zbuffer,c0,c1)
+        draw_gline(int(x0),z0,int(x1),z1,y,screen,zbuffer,clr0,clr1)
         x0 += dx0
         z0 += dz0
         x1 += dx1
         z1 += dz1
         for i in range(3):
-            c0[i]+=dc0[i]
-            c1[i]+=dc1[i]
+            clr0[i]+=dclr0[i]
+            clr1[i]+=dclr1[i]
 
 def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
     #swap points if going right -> left
@@ -228,7 +229,6 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
 #line for gouraud shading
 def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
     #swap points if going right -> left
-    #print(c1)
     if x0 > x1:
         xt = x0
         zt = z0
@@ -246,7 +246,7 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
     limit_color(c0)
     limit_color(c1)
     c = [x for x in c0]
-    print(c0,c1)
+    #print(c0,c1)
     dc = [(c1[i]-c0[i])/distance if distance !=0 else 0 for i in range(3)]
     for x in range(x0,x1+1):
         plot(screen,zbuffer,limit_color([int(c[i]) for i in range(3)]),x,y,z)

@@ -21,8 +21,8 @@ def run(filename):
     ambient = [50,
                50,
                50]
-    light = [[0.5,
-              0.75,
+    light = [[0,
+              0,
               1],
              [255,
               255,
