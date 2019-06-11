@@ -3,6 +3,8 @@ from matrix import *
 from lighting import *
 from math import cos,sin,pi
 
+POLYGON_COUNT = 20
+
 def draw_lines( matrix, screen, zbuffer,color ):
     for i in range(0,len(matrix)-1,2):
         draw_line(matrix[i][0],matrix[i][1],matrix[i][2],matrix[i+1][0],matrix[i+1][1],matrix[i+1][2],screen,zbuffer,color)
@@ -54,6 +56,21 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
         #    except KeyError:
         #        print("oops")
         #print(norms)
+    elif shading == 'phong':
+        norms = {}
+        for i in range(0,len(polygons)-1,3):
+            n = surf(polygons,i)
+            p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
+            corn = [tuple(x) for x in p]
+            for i in range(3):
+                normify(norms,corn[i],n)
+        for j in norms:
+            norm(norms[j])
+        for i in range(0,len(polygons)-1,3):
+            n = surf(polygons,i)
+            if n[2] > 0:
+                scanphong(polygons[i],polygons[i+1],polygons[i+2],norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
+
 
 def normify(norms,c,norm):
     if c in norms:
@@ -124,9 +141,9 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     BtoT = Ty - By * 1.0 + 1
     BtoM = My - By * 1.0 + 1
     MtoT = Ty - My * 1.0 + 1
-    BctoTc = [Tcolor[i] - Bcolor[i] * 1.0 + 1 for i in range(3)]
-    BctoMc = [Mcolor[i] - Bcolor[i] * 1.0 + 1 for i in range(3)]
-    MctoTc = [Tcolor[i] - Mcolor[i] * 1.0 + 1 for i in range(3)]
+    BctoTc = [Tcolor[i] - Bcolor[i] for i in range(3)]
+    BctoMc = [Mcolor[i] - Bcolor[i] for i in range(3)]
+    MctoTc = [Tcolor[i] - Mcolor[i] for i in range(3)]
     switch = False
     dx0 = (Tx-Bx)/BtoT if BtoT != 0 else 0
     dz0 = (Tz-Bz)/BtoT if BtoT != 0 else 0
@@ -146,7 +163,7 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
             dclr1 = [MctoTc[i]/MtoT if MtoT!=0 else 0 for i in range(3)]
             x1 = Mx
             z1 = Mz
-            c = [x for x in Mcolor]
+            #c = [x for x in Mcolor]
             switch = True
         draw_gline(int(x0),z0,int(x1),z1,y,screen,zbuffer,clr0,clr1)
         x0 += dx0
@@ -156,6 +173,62 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
         for i in range(3):
             clr0[i]+=dclr0[i]
             clr1[i]+=dclr1[i]
+
+def scanphong(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color):
+    corners = [c0,c1,c2]
+    corners.sort(key=lambda x:x[1])
+    bot = corners[0]
+    mid = corners[1]
+    top = corners[2]
+    Bx = x0 = x1 = bot[0]
+    Bz = z0 = z1 = bot[2]
+    By = int(bot[1])
+    Tx = top[0]
+    Tz = top[2]
+    Ty = int(top[1])
+    Mx = mid[0]
+    Mz = mid[2]
+    My = int(mid[1])
+    Bnorm = norms[(Bx,bot[1],Bz)]
+    Mnorm = norms[(Mx,mid[1],Mz)]
+    Tnorm = norms[(Tx,top[1],Tz)]
+    BtoT = Ty - By * 1.0 + 1
+    BtoM = My - By * 1.0 + 1
+    MtoT = Ty - My * 1.0 + 1
+    BntoTn = [Tnorm[i] - Bnorm[i] for i in range(3)]
+    BntoMn = [Mnorm[i] - Bnorm[i] for i in range(3)]
+    MntoTn = [Tnorm[i] - Mnorm[i] for i in range(3)]
+    switch = False
+    n0 = [x for x in Bnorm]
+    n1 = [x for x in Bnorm]
+    dx0 = (Tx-Bx)/BtoT if BtoT != 0 else 0
+    dz0 = (Tz-Bz)/BtoT if BtoT != 0 else 0
+    dn0 = [BntoTn[i]/BtoT if BtoT!=0 else 0 for i in range(3)]
+    dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
+    dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
+    dn1 = [BntoMn[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
+    if Ty > 280:
+        print(bot,mid,top)
+        print(Tnorm)
+    #    print(Bcolor,Mcolor,Tcolor)
+    for y in range (By,Ty+1):
+    #    print(Bnorm,Mnorm,Tnorm)
+        if not switch and y >= My:
+            dx1 = (Tx-Mx)/MtoT if MtoT != 0 else 0
+            dz1 = (Tz-Mz)/MtoT if MtoT != 0 else 0
+            dn1 = [MntoTn[i]/MtoT if MtoT!=0 else 0 for i in range(3)]
+            x1 = Mx
+            z1 = Mz
+            #c = [x for x in Mcolor]
+            switch = True
+        draw_pline(int(x0),z0,int(x1),z1,y,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,n0,n1)
+        x0 += dx0
+        z0 += dz0
+        x1 += dx1
+        z1 += dz1
+        for i in range(3):
+            n0[i]+=dn0[i]
+            n1[i]+=dn1[i]
 
 def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
     #swap points if going right -> left
@@ -239,7 +312,6 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
         x1 = xt
         z1 = zt
         c1 = ct
-
     distance = x1 - x0 + 1
     z = z0
     dz = (z1 - z0) / distance if distance != 0 else 0
@@ -253,6 +325,31 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
         z += dz
         for i in range(3):
             c[i]+=dc[i]
+
+def draw_pline( x0, z0, x1, z1,y, view,ambient,light,areflect,dreflect,sreflect,screen, zbuffer, n0,n1 ):
+    #swap points if going right -> left
+    if x0 > x1:
+        xt = x0
+        zt = z0
+        nt = n0
+        x0 = x1
+        z0 = z1
+        n0 = n1
+        x1 = xt
+        z1 = zt
+        n1 = nt
+    distance = x1 - x0 + 1
+    z = z0
+    dz = (z1 - z0) / distance if distance != 0 else 0
+    n = [x for x in n0]
+    #print(c0,c1)
+    dn = [(n1[i]-n0[i])/distance if distance !=0 else 0 for i in range(3)]
+    for x in range(x0,x1+1):
+        color = get_lighting(n,view,ambient, light, areflect, dreflect, sreflect)
+        plot(screen,zbuffer,color,x,y,z)
+        z += dz
+        for i in range(3):
+            n[i]+=dn[i]
 #-------------MESH---------------
 def mesh():
     pass
@@ -290,7 +387,7 @@ def sphere(polygon,args): #[x,y,z,r]
     y = args[1]
     z = args[2]
     r = args[3]
-    n = 20
+    n = POLYGON_COUNT
     p = p_sphere(x,y,z,r,n)
     for i in range(len(p)-1):
         a = i + 1
@@ -318,7 +415,7 @@ def torus(polygon,args): #[x,y,z,r1,r2]
     z = args[2]
     r1 = args[3] #small circles
     r2 = args[4] #big circle
-    n = 20
+    n = POLYGON_COUNT
     p = p_torus(x,y,z,r1,r2,n)
     for i in range(len(p)):
         a = (i+1)%n+i//n*n
