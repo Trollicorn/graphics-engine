@@ -10,6 +10,9 @@ sphere: main.py scripts/test3.mdl
 sflat: main.py scripts/test5.mdl
 	python3 main.py scripts/test5.mdl
 
+obj: main.py scripts/test6.mdl
+	python3 main.py scripts/test6.mdl
+
 clean:
 	rm */*pyc */*out */parsetab.py
 	rm -rf */__pycache__
