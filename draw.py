@@ -358,21 +358,16 @@ def mesh(polygon,args):
         vertices = []
         for line in f.readlines():
             line = line.split()
-            print(len(line))
-            if len(line) != 0:
+            if len(line) == 4:
                 if line[0] == 'v':
                     corner = [float(line[1]),float(line[2]),float(line[3]),1]
                     vertices.append(corner)
                 if line[0] == 'f':
-                    c0 = vertices[int(line[1])]
-                    c1 = vertices[int(line[2])]
-                    c2 = vertices[int(line[3])]
+                    c0 = vertices[int(line[1])-1]
+                    c1 = vertices[int(line[2])-1]
+                    c2 = vertices[int(line[3])-1]
                     add_poly(polygon,c0[0],c0[1],c0[2],c1[0],c1[1],c1[2],c2[0],c2[1],c2[2])
-
         f.close()
-        commands = []
-        symbols = {}
-        return result
     except IOError:
         sys.exit('obj file not found')
 
