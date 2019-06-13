@@ -354,20 +354,20 @@ def draw_pline( x0, z0, x1, z1,y, view,ambient,light,areflect,dreflect,sreflect,
 #-------------MESH---------------
 def mesh(polygon,args):
     try:
-        f = open(filename, "r")
+        f = open(args[0], "r")
         vertices = []
         for line in f.readlines():
-            line = line.strip().split()
-            if len(line) != 4:
-                sys.exit('obj file must use triangles and 3d vertices')
-            if line[0] == 'v':
-                corner = [float(line[1]),float(line[2]),float(line[3]),1]
-                vertices.append(corner)
-            if line[0] == 'f':
-                c0 = vertices[int(line[1])]
-                c1 = vertices[int(line[2])]
-                c2 = vertices[int(line[3])]
-                add_poly(c0[0],c0[1],c0[2],c1[0],c1[1],c1[2],c2[0],c2[1],c2[2])
+            line = line.split()
+            print(len(line))
+            if len(line) != 0:
+                if line[0] == 'v':
+                    corner = [float(line[1]),float(line[2]),float(line[3]),1]
+                    vertices.append(corner)
+                if line[0] == 'f':
+                    c0 = vertices[int(line[1])]
+                    c1 = vertices[int(line[2])]
+                    c2 = vertices[int(line[3])]
+                    add_poly(polygon,c0[0],c0[1],c0[2],c1[0],c1[1],c1[2],c2[0],c2[1],c2[2])
 
         f.close()
         commands = []

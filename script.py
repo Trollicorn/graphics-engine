@@ -61,7 +61,8 @@ def run(filename):
     solid = {
         "box": box,
         "sphere": sphere,
-        "torus": torus
+        "torus": torus,
+        "mesh": mesh
     }
     frames = 1
     basename = 'anim/frame'
