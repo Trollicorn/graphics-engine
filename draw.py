@@ -43,17 +43,20 @@ def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflec
         norms = {}
         for i in range(0,len(polygons)-1,3):
             n = surf(polygons,i)
-            p = [[polygons[i+m][x] for x in range(3)]for m in range(3)]
+        for i in range(0,len(polygons)-1,3):
+            n = surf(polygons,i)
+            p = [polygons[i+m][:3]for m in range(3)]
             corn = [tuple(x) for x in p]
             for i in range(3):
                 normify(norms,corn[i],n)
         for j in norms:
-            norm(norms[j])
+        #    norm(norms[j])
+            norms[j] = get_lighting(norm(norms[j]), view, ambient, light, areflect, dreflect, sreflect)
         for i in range(0,len(polygons)-1,3):
         #    try:
             n = surf(polygons,i)
             if n[2] > 0:
-                scangouraud(polygons[i],polygons[i+1],polygons[i+2],norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color)
+                scangouraud(polygons[i],polygons[i+1],polygons[i+2],norms,screen,zbuffer,color)
         #    except KeyError:
         #        print("oops")
         #print(norms)
@@ -116,7 +119,7 @@ def scanline(c0,c1,c2,screen,zbuffer,color):
         x1 += dx1
         z1 += dz1
 
-def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,screen,zbuffer,color):
+def scangouraud(c0,c1,c2,norms,screen,zbuffer,color):
     corners = [c0,c1,c2]
     corners.sort(key=lambda x:x[1])
     bot = corners[0]
@@ -131,14 +134,14 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     Mx = mid[0]
     Mz = mid[2]
     My = int(mid[1])
-    Bnorm = norms[(Bx,bot[1],Bz)]
-    Mnorm = norms[(Mx,mid[1],Mz)]
-    Tnorm = norms[(Tx,top[1],Tz)]
-    Bcolor = get_lighting(Bnorm, view, ambient, light, areflect, dreflect, sreflect)
-    Mcolor = get_lighting(Mnorm, view, ambient, light, areflect, dreflect, sreflect)
-    Tcolor = get_lighting(Tnorm, view, ambient, light, areflect, dreflect, sreflect)
-    clr0 = [x for x in Bcolor]
-    clr1 = [x for x in Bcolor]
+    Bcolor = norms[(Bx,bot[1],Bz)]
+    Mcolor = norms[(Mx,mid[1],Mz)]
+    Tcolor = norms[(Tx,top[1],Tz)]
+#    Bcolor = get_lighting(Bnorm, view, ambient, light, areflect, dreflect, sreflect)
+#    Mcolor = get_lighting(Mnorm, view, ambient, light, areflect, dreflect, sreflect)
+#    Tcolor = get_lighting(Tnorm, view, ambient, light, areflect, dreflect, sreflect)
+    clr0 = Bcolor.copy()
+    clr1 = Bcolor.copy()
     BtoT = Ty - By * 1.0 + 1
     BtoM = My - By * 1.0 + 1
     MtoT = Ty - My * 1.0 + 1
@@ -152,10 +155,10 @@ def scangouraud(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scr
     dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
     dclr1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
-    if Ty > 280:
-        print(bot,mid,top)
-        print(Tnorm)
-        print(Bcolor,Mcolor,Tcolor)
+#    if Ty > 280:
+#        print(bot,mid,top)
+#        print(Tnorm)
+#        print(Bcolor,Mcolor,Tcolor)
     for y in range (By,Ty+1):
     #    print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
@@ -316,13 +319,11 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
     distance = x1 - x0 + 1
     z = z0
     dz = (z1 - z0) / distance if distance != 0 else 0
-    limit_color(c0)
-    limit_color(c1)
-    c = [x for x in c0]
+    c = c0.copy()
     #print(c0,c1)
     dc = [(c1[i]-c0[i])/distance if distance !=0 else 0 for i in range(3)]
     for x in range(x0,x1+1):
-        plot(screen,zbuffer,limit_color([int(c[i]) for i in range(3)]),x,y,z)
+        plot(screen,zbuffer,[int(c[i]) for i in range(3)],x,y,z)
         z += dz
         for i in range(3):
             c[i]+=dc[i]

@@ -1,5 +1,5 @@
 // Note: This uses the light values in the provided source code.
-shading phong
+shading gouraud
 push
 move 250 250 0
 rotate x 45

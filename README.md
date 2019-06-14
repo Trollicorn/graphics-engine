@@ -2,9 +2,8 @@
 ## Mohammed Uddin
 ## Team something
 
-### Features to implement (in order)
+### Featuresimplemented
 - shading wireframe
-- shading gouraud 
+- shading gouraud (bit buggy)
 - mesh
-- texture mapping
-- shading phong
+- shading phong (bit buggy)
