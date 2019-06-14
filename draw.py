@@ -137,9 +137,6 @@ def scangouraud(c0,c1,c2,norms,screen,zbuffer,color):
     Bcolor = norms[(Bx,bot[1],Bz)]
     Mcolor = norms[(Mx,mid[1],Mz)]
     Tcolor = norms[(Tx,top[1],Tz)]
-#    Bcolor = get_lighting(Bnorm, view, ambient, light, areflect, dreflect, sreflect)
-#    Mcolor = get_lighting(Mnorm, view, ambient, light, areflect, dreflect, sreflect)
-#    Tcolor = get_lighting(Tnorm, view, ambient, light, areflect, dreflect, sreflect)
     clr0 = Bcolor.copy()
     clr1 = Bcolor.copy()
     BtoT = Ty - By * 1.0 + 1
@@ -155,10 +152,6 @@ def scangouraud(c0,c1,c2,norms,screen,zbuffer,color):
     dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
     dclr1 = [BctoMc[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
-#    if Ty > 280:
-#        print(bot,mid,top)
-#        print(Tnorm)
-#        print(Bcolor,Mcolor,Tcolor)
     for y in range (By,Ty+1):
     #    print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
@@ -322,8 +315,8 @@ def draw_gline( x0, z0, x1, z1,y, screen, zbuffer, c0,c1 ):
     c = c0.copy()
     #print(c0,c1)
     dc = [(c1[i]-c0[i])/distance if distance !=0 else 0 for i in range(3)]
-    for x in range(x0,x1+1):
-        plot(screen,zbuffer,[int(c[i]) for i in range(3)],x,y,z)
+    for x in range(x0,x1):
+        plot(screen,zbuffer,[int(t) for t in c],x,y,z)
         z += dz
         for i in range(3):
             c[i]+=dc[i]
