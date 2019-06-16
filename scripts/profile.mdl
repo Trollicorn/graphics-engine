@@ -1,0 +1,81 @@
+// Note: This uses the light values in the provided source code.
+shading phong
+constants brass 0.329412 0.780392 0.992157 0.223529 0.568627 0.941176 0.027451 0.113725 0.807843
+constants shiny_teal 0.3 0.0 0.0 0.3 0.2 0.8 0.3 0.2 0.8
+push
+move 100 -100 0
+rotate y 30
+rotate x 30
+scale 3 3 3
+push
+//shades
+//rotate y 90
+move 0 180 3
+scale 6 6 6
+rotate x -90
+rotate x -10
+mesh shiny_teal :shades.obj
+pop
+push
+//trumpet
+//rotate y 90
+move 20 283 138
+scale 0.3 0.3 0.3
+mesh brass :trumpet.obj
+pop
+push
+//gnome
+//move 0 0 0
+scale 10 10 10
+//rotate y 90
+rotate x -90
+mesh :gnome.obj
+pop
+pop
+
+//SIGNATURE
+push
+move 60 100 1000
+scale 2 2 1
+rotate z -30
+//L
+line 0 0 0 0 -10 0
+line 0 -10 0 4 -10 0
+//O
+move 7 0 0
+line 0 -5 0 2 0 0
+line 2 0 0 4 -5 0
+line 4 -5 0 2 -10 0
+line 2 -10 0 0 -5 0
+//B
+move 7 0 0
+line 0 0 0 0 -10 0
+line 0 0 0 4 -2 0
+line 4 -2 0 0 -4 0
+line 0 -4 0 4 -7 0
+line 4 -7 0 0 -10 0
+//S
+move 7 0 0
+line 4 0 0 0 -3 0
+line 0 -3 0 4 -7 0
+line 4 -7 0 0 -10 0
+//T
+move 7 0 0
+line 0 0 0 4 0 0
+line 2 0 0 2 -10 0
+//E
+move 7 0 0
+line 0 0 0 0 -10 0
+line 0 0 0 4 0 0
+line 0 -5 0 4 -5 0
+line 0 -10 0 4 -10 0
+//R
+move 7 0 0
+line 0 0 0 0 -10 0
+line 0 0 0 4 -3 0
+line 4 -3 0 0 -6 0
+line 0 -6 0 4 -10 0
+pop
+
+display
+save profile.png

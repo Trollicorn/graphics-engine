@@ -138,8 +138,6 @@ def run(filename):
                 display(screen)
             elif op == 'save' and frames == 1:
                 save_extension(screen,command['args'][0]+'.png')
-            elif op == 'mesh':
-                print(command)
             else:
                 print(command['op'])
                 print(command)

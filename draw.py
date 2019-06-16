@@ -23,13 +23,11 @@ def add_poly(polygon,x0,y0,z0,x1,y1,z1,x2,y2,z2):
     add_point(polygon,x2,y2,z2)
 
 def draw_polygons(polygons, screen, zbuffer,color, view, ambient, light, areflect, dreflect, sreflect,shading):
-    print(shading)
     if shading == 'flat':
         for i in range(0,len(polygons)-1,3):
             n = surf(polygons,i)
             if n[2] > 0:
                 color = get_lighting(n, view, ambient, light, areflect, dreflect, sreflect)
-            #    print(color)
                 scanline(polygons[i],polygons[i+1],polygons[i+2],screen,zbuffer,color)
     elif shading == 'wireframe':
         for i in range(0,len(polygons)-1,3):
@@ -204,10 +202,6 @@ def scanphong(c0,c1,c2,norms,view,ambient,light,areflect,dreflect,sreflect,scree
     dx1 = (Mx-Bx)/BtoM if BtoM != 0 else 0
     dz1 = (Mz-Bz)/BtoM if BtoM != 0 else 0
     dn1 = [BntoMn[i]/BtoM if BtoM!=0 else 0 for i in range(3)]
-    if Ty > 280:
-        print(bot,mid,top)
-        print(Tnorm)
-    #    print(Bcolor,Mcolor,Tcolor)
     for y in range (By,Ty+1):
     #    print(Bnorm,Mnorm,Tnorm)
         if not switch and y >= My:
@@ -352,17 +346,26 @@ def mesh(polygon,args):
         vertices = []
         for line in f.readlines():
             line = line.split()
-            if len(line) == 4:
+            if len(line) > 1:
                 if line[0] == 'v':
                     corner = [float(line[1]),float(line[2]),float(line[3]),1]
                     vertices.append(corner)
-                if line[0] == 'f':
-                    c0 = vertices[int(line[1])-1]
-                    c1 = vertices[int(line[2])-1]
-                    c2 = vertices[int(line[3])-1]
-                    add_poly(polygon,c0[0],c0[1],c0[2],c1[0],c1[1],c1[2],c2[0],c2[1],c2[2])
+                if line[0] == 'f': #fan triangulation
+                    corners = len(line)
+                    face = line.copy()
+                    for x in range(1,len(face)):
+                        face[x] = face[x].split('/')[0]
+                    #print(face)
+                    c0 = vertices[int(face[1])-1] #corner of all triangles
+                    for i in range(2,corners-1):
+                        c1 = vertices[int(face[i])-1]
+                        c2 = vertices[int(face[i+1])-1]
+                        #print(c0,c1,c2)
+                        add_poly(polygon,c0[0],c0[1],c0[2],c1[0],c1[1],c1[2],c2[0],c2[1],c2[2])
+            #    print(polygon)
         f.close()
     except IOError:
+        print("oops")
         sys.exit('obj file not found')
 
 

@@ -1,6 +1,9 @@
 run: main.py scripts/test2.mdl
 	python3 main.py scripts/test2.mdl
 
+art: main.py scripts/art.mdl
+	python3 main.py scripts/art.mdl
+
 flat: main.py scripts/test4.mdl
 	python3 main.py scripts/test4.mdl
 
