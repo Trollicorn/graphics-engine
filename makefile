@@ -1,5 +1,5 @@
 run: main.py scripts/test2.mdl
-	python3 main.py scripts/test2.mdl
+	python3 main.py scripts/run.mdl
 
 art: main.py scripts/art.mdl
 	python3 main.py scripts/art.mdl
